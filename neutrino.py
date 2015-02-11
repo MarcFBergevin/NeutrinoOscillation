@@ -7,6 +7,8 @@
 #
 import math as math
 import numpy as n
+
+# Currently using ROOT, but will migrate to matplotlib
 import ROOT as ROOT
 from ROOT import TCanvas, TPad, TFile, TPaveText
 from ROOT import gBenchmark, gStyle, gROOT,TColor, TChain
@@ -35,7 +37,8 @@ class NeutrinoOscillation:
     delta_32 	= 0.0
     
     #
-    # Define a ROOT object
+    # Define a ROOT object, this object is a mathematical function that will hold the
+    # neutrino spectra generated at the reactor
     #
     U235S  = ROOT.TF1("U235S","[0]*exp([1]-[2]*x-[3]*x*x)",1.806,20.00)
     Pu239S = ROOT.TF1("Pu239S","[0]*exp([1]-[2]*x-[3]*x*x)",1.806,14.000)
@@ -43,6 +46,9 @@ class NeutrinoOscillation:
     Pu241S = ROOT.TF1("Pu241S","[0]*exp([1]-[2]*x-[3]*x*x)",1.806,14.000)
     IBDEnergyTotal = ROOT.TF1
     
+    #
+    # This four spectra have been convoluted with the neutrino cross-section on Hydrogen
+    #
     nu_U235S   = ROOT.TF1
     nu_Pu239S  = ROOT.TF1
     nu_U238S   = ROOT.TF1
@@ -58,61 +64,61 @@ class NeutrinoOscillation:
         """ Values taken from http://pdg.lbl.gov/2013/reviews/rpp2013-rev-neutrino-mixing.pdf """
     
         if dm12_flag == None:
-            dm12 		= 7.54e-5               # (+0.26/-0.22)
+            self.dm12 		= 7.54e-5               # (+0.26/-0.22)
         if s12_flag == None:
-            s12			= math.sqrt(0.307)      # (+0.018/-0.018)
+            self.s12			= math.sqrt(0.307)      # (+0.018/-0.018)
         
         if   hierarchy_flag == 0:
-            dm13 		= 2.43e-3 + dm12/2.0        # (+0.07/-0.11)
-            dm23        = 2.43e-3 - dm12/2.0
+            self.dm13 		= 2.43e-3 + self.dm12/2.0        # (+0.07/-0.11)
+            self.dm23        = 2.43e-3 - self.dm12/2.0
             if s23_flag == None:
-                s23			= math.sqrt(0.386)  # (+0.024/-0.024)
+                self.s23			= math.sqrt(0.386)  # (+0.024/-0.024)
             if s13_flag == None:
-                s13			= math.sqrt(0.0241) # (+0.0025/-0.0025)
+                self.s13			= math.sqrt(0.0241) # (+0.0025/-0.0025)
             print '\nUsing normal hierarchy'
 
         elif hierarchy_flag == 1:
-            dm13 		= 2.42e-3 + dm12/2.0        # (+0.07/-0.11)
-            dm23        = 2.42e-3 - dm12/2.0
+            self.dm13 		= 2.42e-3 + self.dm12/2.0        # (+0.07/-0.11)
+            self.dm23        = 2.42e-3 - self.dm12/2.0
             if s23_flag == None:
-                s23			= math.sqrt(0.392)  # (+0.024/-0.024)
+                self.s23			= math.sqrt(0.392)  # (+0.024/-0.024)
             if s13_flag == None:
-                s13			= math.sqrt(0.0244) # (+0.0023/-0.0025)
+                self.s13			= math.sqrt(0.0244) # (+0.0023/-0.0025)
             print '\nUsing inverted hierarchy'
 
-        delta_31 	= 1.27*dm13
-        delta_21 	= 1.27*dm12
-        delta_32 	= 1.27*dm23
-        t12 		= math.asin(s12)
-        t23 		= math.asin(s23)
-        t13 		= math.asin(s13)
+        self.delta_31 	= 1.27*self.dm13
+        self.delta_21 	= 1.27*self.dm12
+        self.delta_32 	= 1.27*self.dm23
+        self.t12 		= math.asin(self.s12)
+        self.t23 		= math.asin(self.s23)
+        self.t13 		= math.asin(self.s13)
 
         print ' %s_12 = %0.4e \t\t %s_12 = %4.2f%s \t\t sin^2(2%s_12) = %0.3f \t\t tan^2(%s_12)  = %0.3f' % (u"\u03B8",
-                                                                                                             t12,u"\u03B8",
-                                                                                                             t12*180./math.pi,u"\xb0",
+                                                                                                             self.t12,u"\u03B8",
+                                                                                                             self.t12*180./math.pi,u"\xb0",
                                                                                                              u"\u03B8",
-                                                                                                             math.sin(2.0*t12)*math.sin(2.0*t12),
+                                                                                                             math.sin(2.0*self.t12)*math.sin(2.0*self.t12),
                                                                                                              u"\u03B8",
-                                                                                                             math.tan(t12)*math.tan(t12))
+                                                                                                             math.tan(self.t12)*math.tan(self.t12))
 
-        print ' %s_23 = %0.4e \t\t %s_23 = %4.2f%s \t\t sin^2(2%s_23) = %0.3f' % (u"\u03B8",t23,
+        print ' %s_23 = %0.4e \t\t %s_23 = %4.2f%s \t\t sin^2(2%s_23) = %0.3f' % (u"\u03B8",self.t23,
                                                                                   u"\u03B8",
-                                                                                  t23*180./math.pi,
+                                                                                  self.t23*180./math.pi,
                                                                                   u"\xb0",
                                                                                   u"\u03B8",
-                                                                                  math.sin(2.0*t23)*math.sin(2.0*t23))
+                                                                                  math.sin(2.0*self.t23)*math.sin(2.0*self.t23))
 
         print ' %s_13 = %0.4e \t\t %s_13 =  %4.2f%s \t\t sin^2(2%s_13) = %0.3f' % (u"\u03B8",
-                                                                                   t13,
+                                                                                   self.t13,
                                                                                    u"\u03B8",
-                                                                                   t13*180./math.pi,
+                                                                                   self.t13*180./math.pi,
                                                                                    u"\xb0",
                                                                                    u"\u03B8",
-                                                                                   math.sin(2.0*t13)*math.sin(2.0*t13))
+                                                                                   math.sin(2.0*self.t13)*math.sin(2.0*self.t13))
 
-        print ' %s_12 = %0.4e eV**2' % (u"\u0394",dm12)
-        print ' %s_23 = %0.4e eV**2' % (u"\u0394",dm23)
-        print ' %s_13 = %0.4e eV**2\n' % (u"\u0394",dm13)
+        print ' %s_12 = %0.4e eV**2' % (u"\u0394",self.dm12)
+        print ' %s_23 = %0.4e eV**2' % (u"\u0394",self.dm23)
+        print ' %s_13 = %0.4e eV**2\n' % (u"\u0394",self.dm13)
 
         GWth       = 2e20              # neutrino per GWth
         av_num     = 6.02214129e23     # mol^-1 2 H
@@ -173,7 +179,6 @@ class NeutrinoOscillation:
         kappa_238U      = 0.079
         kappa_241P      = 0.1085
 
-
         Ef_235U         = 201.92
         Ef_239P         = 209.99
         Ef_238U         = 205.52
@@ -214,7 +219,6 @@ class NeutrinoOscillation:
         self.nu_Pu239S  = ROOT.TF1("nu_Pu239S","(Pu239S)*Xsect",1.806,14.000)
         self.nu_U238S   = ROOT.TF1("nu_U238S",  "(U238S)*Xsect",1.806,14.000)
         self.nu_Pu241S  = ROOT.TF1("nu_Pu241S","(Pu241S)*Xsect",1.806,14.000)
-    
         self.IBDEnergy.SetNpx(10000)
         self.nu_U235S.SetNpx(10000)
         self.nu_Pu239S.SetNpx(10000)
@@ -226,12 +230,16 @@ class NeutrinoOscillation:
         self.nu_Pu239S.SetTitle("Pu239 isotope")
         self.nu_U238S.SetTitle("U238 isotope")
         self.nu_Pu241S.SetTitle("Pu241 isotope")
+        self.nu_U235S.SetLineColor(ROOT.kMagenta)
+        self.nu_Pu239S.SetLineColor(ROOT.kOrange+8)
+        self.nu_U238S.SetLineColor(ROOT.kBlue-6)
+        self.nu_Pu241S.SetLineColor(ROOT.kGreen+3)
     
             
     def ApplyBurnup(self,days):
         """ Add the burn-up behavior applied """
         
-        alpha_235U_bu = alpha_235U 
+        alpha_235U_bu = alpha_235U
         alpha_239P_bu = alpha_239P
         alpha_238U_bu = alpha_238U
         alpha_241P_bu = alpha_241P
@@ -254,12 +262,14 @@ class NeutrinoOscillation:
 #
 if __name__ == "__main__":
     
+    print 'Code written by Marc Bergevin, circa 2014.  Please feel free to \nuse and modify the code, but give me a shoot-out if possible.\n'
+    
     personalDetector    = raw_input('Would you like to define your own detector (yes/no)?:')
     
     if personalDetector == 'yes':
         # Define your very own detector
         detectorMedium      = int(raw_input('What detector medium (liquid scintillator=0,water=1)?:\n'))
-        detectorMass        = int(raw_input('What detector mass (ton)?:\n'))
+        detectorMass        = float(raw_input('What detector mass (ton)?:\n'))
         reactorPower        = float(raw_input('What is the reactor power (GWth)?:\n'))
         reactorStandoff     = float(raw_input('What is the reactor to detector distance (km)?:\n'))
     else:
@@ -271,15 +281,14 @@ if __name__ == "__main__":
 
     nuOsc = NeutrinoOscillation(detectorMedium,detectorMass,reactorPower,reactorStandoff,hierarchy_flag=0)
     # One can change any paramters manually in the following way
-    #nuOsc = NeutrinoOscillation(detectorMedium,detectorMass,reactorPower,reactorStandoff,s13=3)
+#nuOsc = NeutrinoOscillation(detectorMedium,detectorMass,reactorPower,reactorStandoff,s13=3)
 
 
 
-    nuOsc.nu_U235S.SetLineColor(ROOT.kMagenta)
-    nuOsc.nu_Pu239S.SetLineColor(ROOT.kOrange+8)
-    nuOsc.nu_U238S.SetLineColor(ROOT.kBlue-6)
-    nuOsc.nu_Pu241S.SetLineColor(ROOT.kGreen+3)
-    print '%s ' %(nuOsc.FindRate())
+    #Example of obtaining the rate from the object
+    #
+    #print '%s ' %(nuOsc.FindRate())
+
     nuOsc.IBDEnergy.Draw()
     nuOsc.nu_U235S.Draw("same")
     nuOsc.nu_Pu239S.Draw("same")
