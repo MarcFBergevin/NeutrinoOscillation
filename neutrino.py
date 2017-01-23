@@ -264,6 +264,7 @@ class NeutrinoOscillation:
         print ' Neutrino rate in detector : %4.3f per day (after-osc, pre-efficiency)' %(afterOsc)
     
         self.nuOsc_IBDEnergy.SetNpx(10000)
+        self.nuOsc_IBDEnergy.SetLineColor(4)
         self.nuOsc_U235S.SetNpx(10000)
         self.nuOsc_Pu239S.SetNpx(10000)
         self.nuOsc_U238S.SetNpx(10000)
@@ -327,7 +328,4 @@ if __name__ == "__main__":
     #print '%s ' %(nuOsc.FindRate())
 
     nuOsc.IBDEnergy.Draw()
-    nuOsc.nu_U235S.Draw("same")
-    nuOsc.nu_Pu239S.Draw("same")
-    nuOsc.nu_U238S.Draw("same")
-    nuOsc.nu_Pu241S.Draw("same")
+    nuOsc.nuOsc_IBDEnergy.Draw("same")
