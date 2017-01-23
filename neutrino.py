@@ -53,7 +53,17 @@ class NeutrinoOscillation:
     nu_Pu239S  = ROOT.TF1
     nu_U238S   = ROOT.TF1
     nu_Pu241S  = ROOT.TF1
+    
+    
+    nuOsc_U235S   = ROOT.TF1
+    nuOSc_Pu239S  = ROOT.TF1
+    nuOsc_U238S   = ROOT.TF1
+    nuOsc_Pu241S  = ROOT.TF1
+    
+    Osc     = ROOT.TF1
 
+    
+    
     #
     # Class methods
     #
@@ -147,7 +157,7 @@ class NeutrinoOscillation:
         print '          proton-target    : %4.3e' %(protons)
         print ' Reactor  power (GWth)     : %4.3f' %(power)
         print '          distance (km)    : %4.3f' %(standoff)
-        print ' Neutrino rate in detector : %4.3f per day (pre-efficiency)' %(self.rate)
+        print ' Neutrino rate in detector : %4.3f per day (pre-osc, pre-efficiency)' %(self.rate)
 
         mNeutron        = 939.565378
         mProton         = 938.27
@@ -234,6 +244,33 @@ class NeutrinoOscillation:
         self.nu_Pu239S.SetLineColor(ROOT.kOrange+8)
         self.nu_U238S.SetLineColor(ROOT.kBlue-6)
         self.nu_Pu241S.SetLineColor(ROOT.kGreen+3)
+    
+        self.Osc     = ROOT.TF1("Osc","1.- pow(cos([0]),4)*pow(sin(2*[1]),2)*pow(sin([3]*[2]/x),2) - pow(sin(2*[0]),2)*pow(cos([1]),2)*pow(sin([4]*[2]/x),2) - pow(sin(2*[0]),2)*pow(sin([1]),2)*pow(sin([5]*[2]/x),2)",1.806,14.00)
+        self.Osc.SetParameter(0,self.t13)
+        self.Osc.SetParameter(1,self.t12)
+        self.Osc.SetParameter(2,standoff*1000.)
+        self.Osc.SetParameter(3,self.delta_21)
+        self.Osc.SetParameter(4,self.delta_31)
+        self.Osc.SetParameter(5,self.delta_32)
+
+        
+        self.nuOsc_IBDEnergy   = ROOT.TF1("nuOsc_IBDEnergy","IBDEnergy*Osc",1.806,14.00)
+        self.nuOsc_U235S   =  ROOT.TF1("nu_U235S","(nu_U235S)*Osc",1.806,14.000)
+        self.nuOsc_Pu239S  =  ROOT.TF1("nu_Pu239S","(nu_Pu239S)*Osc",1.806,14.000)
+        self.nuOsc_U238S   =  ROOT.TF1("nu_U238S","(nu_U238S)*Osc",1.806,14.000)
+        self.nuOsc_Pu241S  =  ROOT.TF1("nu_Pu241S","(nu_Pu241S)*Osc",1.806,14.000)
+    
+        afterOsc = self.rate * self.nuOsc_IBDEnergy.Integral(1.806,14)/self.IBDEnergy.Integral(1.806,14)
+        print ' Neutrino rate in detector : %4.3f per day (after-osc, pre-efficiency)' %(afterOsc)
+    
+        self.nuOsc_IBDEnergy.SetNpx(10000)
+        self.nuOsc_U235S.SetNpx(10000)
+        self.nuOsc_Pu239S.SetNpx(10000)
+        self.nuOsc_U238S.SetNpx(10000)
+        self.nuOsc_Pu241S.SetNpx(10000)
+
+
+
     
             
     def ApplyBurnup(self,days):
